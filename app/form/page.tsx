@@ -41,6 +41,8 @@ const initialForm: FormData = {
   viralAssets: '',
   viralAssetsLink: '',
   otherNotes: '',
+  preferredDate: '',
+  preferredTime: '',
 };
 
 type Errors = Partial<Record<keyof FormData, string>>;
@@ -505,6 +507,30 @@ export default function FormPage() {
                     </div>
                   )}
                 </div>
+              </FormField>
+
+              <FormField label="희망 미팅 일정">
+                <div className="flex flex-wrap gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">희망 날짜</label>
+                    <input
+                      type="date"
+                      value={form.preferredDate}
+                      onChange={(e) => update('preferredDate', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">희망 시간</label>
+                    <input
+                      type="time"
+                      value={form.preferredTime}
+                      onChange={(e) => update('preferredTime', e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">담당자가 확인 후 개별 연락을 통해 최종 조율해 드립니다.</p>
               </FormField>
 
               <FormField label="기타 의견/예산/희망 캠페인">

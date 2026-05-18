@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
       viralAssets,
       viralAssetsLink,
       otherNotes,
+      preferredDate,
+      preferredTime,
     } = body;
 
     // Basic validation
@@ -69,6 +71,8 @@ export async function POST(request: NextRequest) {
       viralAssets: viralAssets || '',
       viralAssetsLink: viralAssetsLink || '',
       otherNotes: otherNotes || '',
+      preferredDate: preferredDate || '',
+      preferredTime: preferredTime || '',
     });
 
     return NextResponse.json({ success: true, id });

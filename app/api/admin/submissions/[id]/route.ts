@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSubmissionById } from '@/lib/googleSheets';
+import { getSubmissionById, updateMeetingDateTime } from '@/lib/googleSheets';
 
 export async function GET(
   _request: NextRequest,
@@ -15,5 +15,20 @@ export async function GET(
   } catch (error) {
     console.error('Submission fetch error:', error);
     return NextResponse.json({ error: '데이터를 불러오는 중 오류가 발생했습니다.' }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const { meetingDate, meetingTime } = await request.json();
+    await updateMeetingDateTime(id, meetingDate || '', meetingTime || '');
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Meeting update error:', error);
+    return NextResponse.json({ error: '미팅 일정 저장 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }

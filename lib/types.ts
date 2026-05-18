@@ -30,4 +30,6 @@ export interface FormData {
   viralAssets: string;
   viralAssetsLink: string;
   otherNotes: string;
+  preferredDate: string;
+  preferredTime: string;
 }

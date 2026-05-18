@@ -46,8 +46,11 @@ export interface Submission {
   viralAssets: string;
   viralAssetsLink: string;
   otherNotes: string;
+  preferredDate: string;
+  preferredTime: string;
   meetingStatus: string;
-  meetingSlotId: string;
+  meetingDate: string;
+  meetingTime: string;
 }
 
 export interface Slot {
@@ -103,8 +106,11 @@ function rowToSubmission(row: string[]): Submission {
     viralAssets: row[24] || '',
     viralAssetsLink: row[25] || '',
     otherNotes: row[26] || '',
-    meetingStatus: row[27] || '',
-    meetingSlotId: row[28] || '',
+    preferredDate: row[27] || '',
+    preferredTime: row[28] || '',
+    meetingStatus: row[29] || '',
+    meetingDate: row[30] || '',
+    meetingTime: row[31] || '',
   };
 }
 
@@ -139,7 +145,7 @@ export async function getSubmissions(): Promise<Submission[]> {
   const sheets = getSheets();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
-    range: 'submission!A2:AB',
+    range: 'submission!A2:AF',
   });
   const rows = res.data.values || [];
   return rows.map((r) => rowToSubmission(r as string[]));
@@ -150,7 +156,7 @@ export async function getSubmissionById(id: string): Promise<Submission | null> 
   return all.find((s) => s.id === id) || null;
 }
 
-export async function addSubmission(data: Omit<Submission, 'id' | 'timestamp' | 'meetingStatus' | 'meetingSlotId'>): Promise<string> {
+export async function addSubmission(data: Omit<Submission, 'id' | 'timestamp' | 'meetingStatus' | 'meetingDate' | 'meetingTime'>): Promise<string> {
   const sheets = getSheets();
   const id = `sub_${Date.now()}`;
   const timestamp = new Date().toISOString();
@@ -183,13 +189,16 @@ export async function addSubmission(data: Omit<Submission, 'id' | 'timestamp' | 
     data.viralAssets,
     data.viralAssetsLink,
     data.otherNotes,
-    '미팅 예정',
+    data.preferredDate,
+    data.preferredTime,
+    '검토 중',
+    '',
     '',
   ];
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SHEET_ID,
-    range: 'submission!A:AB',
+    range: 'submission!A:AF',
     valueInputOption: 'USER_ENTERED',
     requestBody: { values: [row] },
   });
@@ -197,7 +206,7 @@ export async function addSubmission(data: Omit<Submission, 'id' | 'timestamp' | 
   return id;
 }
 
-export async function updateSubmissionMeeting(submissionId: string, slotId: string): Promise<void> {
+export async function updateMeetingDateTime(submissionId: string, date: string, time: string): Promise<void> {
   const sheets = getSheets();
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SHEET_ID,
@@ -207,12 +216,12 @@ export async function updateSubmissionMeeting(submissionId: string, slotId: stri
   const rowIndex = rows.findIndex((r) => r[0] === submissionId);
   if (rowIndex === -1) return;
 
-  const rowNumber = rowIndex + 1; // 1-indexed
+  const rowNumber = rowIndex + 1;
   await sheets.spreadsheets.values.update({
     spreadsheetId: SHEET_ID,
-    range: `submission!AA${rowNumber}:AB${rowNumber}`,
+    range: `submission!AD${rowNumber}:AF${rowNumber}`,
     valueInputOption: 'USER_ENTERED',
-    requestBody: { values: [['미팅 확정', slotId]] },
+    requestBody: { values: [['미팅 확정', date, time]] },
   });
 }
 
@@ -305,8 +314,7 @@ export async function bookSlot(
     requestBody: { values: [bookingRow] },
   });
 
-  // Update submission meeting status
-  await updateSubmissionMeeting(submissionId, slotId);
+  await updateMeetingDateTime(submissionId, info.date, info.time);
 
   return bookingId;
 }
